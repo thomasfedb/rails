@@ -300,6 +300,16 @@ class TemplateDigestorTest < ActionView::TestCase
     end
   end
 
+  def test_cross_format_dependencies
+    finder.rendered_format = :js
+    assert_equal ["widgets/widget"], dependencies("widgets/show")
+  end
+
+  def test_cross_format_digest
+    finder.rendered_format = :js
+    assert_not_equal "", digest("widgets/widget")
+  end
+
   private
     def assert_logged(message)
       old_logger = ActionView::Base.logger

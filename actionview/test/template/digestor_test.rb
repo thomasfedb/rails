@@ -169,6 +169,18 @@ class TemplateDigestorTest < ActionView::TestCase
     assert_equal [:html], tree_template_formats("messages/show").uniq
   end
 
+  def test_mixed_template_format_dependencies
+    finder.rendered_format = :js
+    assert_equal ["comments/comment"], dependencies("comments/show")
+  end
+
+  def test_mixed_template_format_digest
+    finder.rendered_format = :js
+    assert_digest_difference("comments/show") do
+      change_template("comments/_comment")
+    end
+  end
+
   def test_recursion_in_renders
     assert digest("level/recursion") # assert recursion is possible
     assert_not_nil digest("level/recursion") # assert digest is stored

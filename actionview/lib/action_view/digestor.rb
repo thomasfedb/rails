@@ -44,10 +44,7 @@ module ActionView
       def tree(name, finder, partial = false, seen = {})
         logical_name = name.gsub(%r|/_|, "/")
 
-        options = {}
-        options[:formats] = [finder.rendered_format] if finder.rendered_format
-
-        if template = finder.disable_cache { finder.find_all(logical_name, [], partial, [], options).first }
+        if template = find_template(finder, logical_name, [], partial, [])
           finder.rendered_format ||= template.formats.first
 
           if node = seen[template.identifier] # handle cycles in the tree
@@ -69,6 +66,17 @@ module ActionView
           seen[name] ||= Missing.new(name, logical_name, nil)
         end
       end
+
+      private
+        def find_template(finder, *args)
+          finder.disable_cache do
+            if format = finder.rendered_format
+              finder.find_all(*args, formats: [format]).first || finder.find_all(*args).first
+            else
+              finder.find_all(*args).first
+            end
+          end
+        end
     end
 
     class Node
